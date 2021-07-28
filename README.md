@@ -1,4 +1,5 @@
 # ProjektDokumentation
 
 test
-insert Test_HelloWorld
+
+insert prodoc: Test_HelloWorld
