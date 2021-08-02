@@ -2,11 +2,12 @@ public class Test {
 
     public void testMethod() {
 
-        /* @Prodoc: Test_testMethod_1 */
+        /* @ProDoc: ichwillesso */
         System.out.println("This is a test!");
         System.out.println("second test? :flushed:");
-        /* @Prodoc: end*/
+        /* @EndDoc*/
 
         System.out.println("sucuk");
     }
+    //==> generatedID = [package].[class].[tag] => at.prodoc.Test.ichwillesso
 }

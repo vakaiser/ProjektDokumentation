@@ -13,22 +13,34 @@ public class Main {
 
         Main main = new Main();
 
-        File file = new File("C:\\Users\\efsun\\OneDrive\\POS\\_projekt\\ProjektDokumentation\\ProjektDokumentation\\src\\main\\java\\Test.java");
-        File md = new File("C:\\Users\\efsun\\OneDrive\\POS\\_projekt\\ProjektDokumentation\\README.md");
+        File file = new File("..\\ProjektDokumentation\\ProjektDokumentation\\src\\main\\java\\Test.java");
+        File file2 = new File("..\\ProjektDokumentation\\ProjektDokumentation\\src\\main\\java\\Test2.java");
+        List<File> files = new ArrayList<>();
+        files.add(file);
+        files.add(file2);
 
-        main.findSnippets(file);
+        File md = new File("..\\ProjektDokumentation\\README.md");
+
+        List<CodeSnippet> snippets = main.findSnippets(files);
+        snippets.forEach(System.out::println);
+        main.generateEnrichedMd(md, snippets);
     }
 
-    public List<CodeSnippet> findSnippets(File file) {
+    public List<CodeSnippet> findSnippets(List<File> files) {
         List<CodeSnippet> result = new ArrayList<>();
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
+            BufferedReader br;
+            List<String> lines = new ArrayList<>();
+            for (File file: files) {
+                 br = new BufferedReader(new FileReader(file));
+                 lines.addAll(br.lines().collect(Collectors.toList()));
+            }
+            //List<String> lines = br.lines().collect(Collectors.toList());
 
             boolean marked = false;
-            String content = ""; //test stuff delete later
+            String content = "";
             String id = "";
-            List<String> lines = br.lines().collect(Collectors.toList());
             System.out.println(lines.size());
 
             String line = "";
@@ -39,16 +51,21 @@ public class Main {
                     if (line.contains("end")) {
                         marked = false;
                         result.add(new CodeSnippet(id, content));
+                        content = "";
+                        id = "";
                     } else {
                         marked = true;
-                        id = line.split(" ")[1];
+                        line = line.replace(" ", "")
+                              .replace("*", "")
+                              .replace("/", "");
+                        id = line.split(":")[1];
                     }
                 } else if (marked) {
-                    content += line.replace("  ", "") + "\n";  //delete later
+                    content += line.replace("  ", "") + "\n";
                 }
             }
 
-            System.out.println(content);
+            System.out.println(content); //test stuff
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -67,8 +84,20 @@ public class Main {
             for (int i = 0; i < lines.size(); i++) {
                 line = lines.get(i);
                 if (line.toLowerCase().contains("prodoc")) {
-                    String replace = line.split(" ")[2];
-                    line.replace(replace, "sus");
+                    line = line.replace(" ", "");
+                    String id = line.split(":")[1];
+
+                    for (CodeSnippet snippet : snippets) {
+                        if (snippet.getId().toLowerCase().equals(id.toLowerCase())) line = "java\n"+ snippet.getContent();
+
+                    }
+
+                    /*line = snippets.stream().map(x -> x.getId())
+                    .filter(x -> x.contains(id))
+                    .findFirst()
+                    .toString();*/
+                    //System.out.println(line);
+                    //line.replace(replace, "sus");
                 }
                 bw.write(line);
                 bw.newLine();
@@ -82,8 +111,8 @@ public class Main {
     }
 
     private void placeHolder() {
-        File file = new File("C:\\Users\\efsun\\OneDrive\\POS\\_projekt\\ProjektDokumentation\\ProjektDokumentation\\src\\main\\java\\Test.java");
-        File md = new File("C:\\Users\\efsun\\OneDrive\\POS\\_projekt\\ProjektDokumentation\\README.md");
+        File file = new File("..\\ProjektDokumentation\\ProjektDokumentation\\src\\main\\java\\Test.java");
+        File md = new File("..\\ProjektDokumentation\\README.md");
 
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
@@ -93,7 +122,7 @@ public class Main {
             boolean marked = false;
             String code = "";
             List<String> lines = br.lines().collect(Collectors.toList());
-            System.out.println(lines.size());
+            //System.out.println(lines.size());
 
             String line = "";
 
@@ -110,7 +139,7 @@ public class Main {
                 }
             }
 
-            System.out.println(code);
+            //System.out.println(code);
 
         } catch (IOException e) {
             e.printStackTrace();
