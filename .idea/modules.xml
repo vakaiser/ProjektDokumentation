@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../MdProjekt1/MdProjekt1.iml" filepath="$PROJECT_DIR$/../MdProjekt1/MdProjekt1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MdSearcher/MdSearcher.iml" filepath="$PROJECT_DIR$/MdSearcher/MdSearcher.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/ProjektDokumentation.iml" filepath="$PROJECT_DIR$/.idea/ProjektDokumentation.iml" />
     </modules>
   </component>
