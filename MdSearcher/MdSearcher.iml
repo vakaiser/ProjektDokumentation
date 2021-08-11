@@ -14,5 +14,6 @@
     <orderEntry type="module" module-name="MdProjekt3" />
     <orderEntry type="module" module-name="MdProjekt2" />
     <orderEntry type="module" module-name="MdProjekt1" />
+    <orderEntry type="library" name="Maven: commons-io:commons-io:2.6" level="project" />
   </component>
 </module>
