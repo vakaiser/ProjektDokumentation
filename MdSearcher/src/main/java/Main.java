@@ -7,6 +7,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class Main {
     public static void main(String[] args){
@@ -18,7 +20,6 @@ public class Main {
                 Class c = Class.forName(project);
                 String path = c.getProtectionDomain().getCodeSource().getLocation().toURI().getPath().replace("/target/classes/", "");
                 boolean recursive = true;
-
                 Collection files = FileUtils.listFiles(new File(path), null, recursive);
                 List<File> mdFiles = new ArrayList<>();
                 for (Iterator iterator = files.iterator(); iterator.hasNext();) {
@@ -27,27 +28,30 @@ public class Main {
                         mdFiles.add(file);
 
                 }
-                mdFiles = mdFiles.stream().filter(distinctByKey( File::getName)).toList();
+                mdFiles = mdFiles.stream().filter(distinctByKey( File::getName)).sorted().toList();
                 for (File f: mdFiles) {
-                    System.out.println(f.getAbsolutePath());
-                BufferedReader br = new BufferedReader(new FileReader(f));
-                String line = br.readLine();
-                while (line != null) {
-                    bw.write(line);
-                    bw.newLine();
-                    bw.flush();
-                    line = br.readLine();
+                    BufferedReader br = new BufferedReader(new FileReader(f));
+                    String line = br.readLine();
+                    while (line != null) {
+                        bw.write(line);
+                        bw.newLine();
+                        bw.flush();
+                        line = br.readLine();
+                    }
+                    if(project != null) {
+                        bw.write("\n---");
+                        bw.newLine();
+                        bw.write("---");
+                        bw.newLine();
+                        bw.flush();
+                    }
+                    project = projects.readLine();
                 }
-                project = projects.readLine();
                 if(project != null) {
-                    bw.write("\n---");
-                    bw.newLine();
-                    bw.write("---");
-                    bw.newLine();
+
                     bw.write("---");
                     bw.newLine();
                     bw.flush();
-                }
                 }
             }
         } catch (IOException e) {
@@ -59,6 +63,7 @@ public class Main {
         }
 
     }
+
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Set<Object> seen = ConcurrentHashMap.newKeySet();
         return t -> seen.add(keyExtractor.apply(t));

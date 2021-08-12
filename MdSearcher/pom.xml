@@ -33,11 +33,13 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- DO NOT REMOVE THIS DEPENDENCY!-->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.6</version>
         </dependency>
+        <!-- DO NOT REMOVE THIS DEPENDENCY!-->
     </dependencies>
     <properties>
         <maven.compiler.source>16</maven.compiler.source>
