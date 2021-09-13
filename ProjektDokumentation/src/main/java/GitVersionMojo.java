@@ -1,94 +1,44 @@
-import com.sun.org.apache.bcel.internal.classfile.Code;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Main {
+@Mojo(name = "version", defaultPhase = LifecyclePhase.INITIALIZE)
+public class GitVersionMojo extends AbstractMojo {
 
-    public static void main(String args[]) {
-        System.out.println("asdf");
+    //@Parameter(property = "project", readonly = true)
+    //private MavenProject project;
 
-        Main main = new Main();
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        getLog().info("Cool, a maven plugin!");
+        //project.
 
-        File file = new File("..\\ProjektDokumentation\\src\\main\\java\\at\\diggah\\lost\\Test.java");
-        File file2 = new File("..\\ProjektDokumentation\\src\\main\\java\\at\\diggah\\lost\\Test2.java");
+        File file = new File("..\\ProjektDokumentation\\src\\main\\java\\at\\codetemp\\test\\Test.java");
+        File file2 = new File("..\\ProjektDokumentation\\src\\main\\java\\at\\codetemp\\test\\Test2.java");
         List<File> files = new ArrayList<>();
         files.add(file);
         files.add(file2);
 
         File md = new File("..\\ProjektDokumentation\\README.md");
-        File md2 = new File("..\\ProjektDokumentation\\README2.md");
 
         List<String> temp = Arrays.stream(file.getAbsolutePath().split(Pattern.quote(File.separator))).collect(Collectors.toList());
         temp.stream().forEach(System.out::println);
 
-
-
         //System.out.println(file.getParentFile());
         System.out.println(file.getAbsolutePath());
-        List<CodeSnippet> snippets = main.findSnippetsBeta(files);
+        List<CodeSnippet> snippets = findSnippetsBeta(files);
         snippets.forEach(System.out::println);
-        //main.generateEnrichedMd(md, snippets);
-        main.generateNewReadMe(md2, snippets);
+        generateEnrichedMd(md, snippets);
     }
 
-    /*
-        public List<CodeSnippet> findSnippets(List<File> files) {
-            List<CodeSnippet> result = new ArrayList<>();
-
-            try {
-                BufferedReader br;
-                List<String> lines = new ArrayList<>();
-                List<String> filePathEndings = new ArrayList<>();
-                Map<String, List<String>> pathLines = new TreeMap<>();
-                for (File file: files) {
-                     br = new BufferedReader(new FileReader(file));
-                     lines.addAll(br.lines().collect(Collectors.toList()));
-                     List<String> testo = br.lines().collect(Collectors.toList());
-                     List<String> temp = Arrays.stream(file.getAbsolutePath().split(Pattern.quote(File.separator))).collect(Collectors.toList());
-                     String tempString = temp.get(temp.size()-3) + "." + temp.get(temp.size()-2) + "." + temp.get(temp.size()-1) + "." + temp.get(temp.size());
-                     filePathEndings.add(tempString);
-                     pathLines.put(tempString, testo);
-                }
-                //List<String> lines = br.lines().collect(Collectors.toList());
-
-                boolean marked = false;
-                String content = "";
-                String id = "";
-                System.out.println(lines.size());
-
-                String line = "";
-
-                for (int i = 0; i < lines.size(); i++) {
-                    line = lines.get(i);
-                    if (line.toLowerCase().contains("@prodoc")) {
-                        if (line.contains("end")) {
-                            marked = false;
-                            result.add(new CodeSnippet(id, content));
-                            content = "";
-                            id = "";
-                        } else {
-                            marked = true;
-                            line = line.replace(" ", "")
-                                  .replace("*", "")
-                                  .replace("/", "");
-                            id = line.split(":")[1];
-                        }
-                    } else if (marked) {
-                        content += line.replace("  ", "") + "\n";
-                    }
-                }
-
-                System.out.println(content); //test stuff
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return result;
-        }
-    */
     public List<CodeSnippet> findSnippetsBeta(List<File> files) {
         List<CodeSnippet> result = new ArrayList<>();
 
@@ -166,81 +116,48 @@ public class Main {
     }
 
     private void generateNewReadMe(File md, List<CodeSnippet> snippets) {
-        String result = "";
         try {
             BufferedReader br = new BufferedReader(new FileReader(md));
-            //BufferedWriter bw = new BufferedWriter(new FileWriter("README2.md"));
+            BufferedWriter bw = new BufferedWriter(new FileWriter("README.md"));
 
             List<String> lines = br.lines().collect(Collectors.toList());
 
             String line = "";
-            boolean ignore = false;
             for (int i = 0; i < lines.size(); i++) {
                 line = lines.get(i);
-                if (line.toLowerCase().contains("prodoc") && line.toLowerCase().contains("!")) {
-                    //line = line.replace("prodoc", "java");
-
-                    //bw.write(line);
-                    result += line;
-
-                    //bw.newLine();
-                    result += "\n";
-
-                    //bw.write("<!---start doc -->");
-                    result += "<!---start doc -->";
-
-
-                    result += "\n";
-                    result += "```java";
-
+                if (line.toLowerCase().contains("prodoc")) {
+                    //line = line.replace(" ", "");
+                    //String id = line.split(":")[1];
+                    line = line.replace("prodoc", "java");
                     for (CodeSnippet snippet : snippets) {
-                        if (line.toLowerCase().contains(snippet.getId().toLowerCase())) {
-                            //bw.newLine();
-                            result += "\n";
-
-                            //bw.write(snippet.getContent());
-                            result += snippet.getContent();
-                            //line = snippet.getContent();
+                        if (snippet.getId().toLowerCase().equals(line.toLowerCase())) {
+                            line = snippet.getContent();
                         }
+
                     }
-                    result += "```";
-                    result += "\n";
 
-                    //bw.write("<!---end doc -->");
-                    result += "<!---end doc -->";
-
-                    //bw.newLine();
-                    result += "\n";
-                    continue;
-                }
-                else if (line.toLowerCase().contains("start doc")) {
-                    ignore = true;
-                    continue;
-                }
-                else if (line.toLowerCase().contains("end doc")) {
-                    ignore = false;
-                    continue;
                 }
 
-                if (!ignore) {
-                    //bw.write(line);
-                    result += line;
-
-                    //bw.newLine();
-                    result += "\n";
+                //if (line.contains("@")) {
+                for (CodeSnippet snippet : snippets) {
+                    if (snippet.getId().toLowerCase().equals(line.toLowerCase())) {
+                        line = snippet.getContent();
+                    }
                 }
+                //}
 
-                //bw.flush();
+
+                bw.write(line);
+                bw.newLine();
+                bw.flush();
             }
-            BufferedWriter bw = new BufferedWriter(new FileWriter("README2.md"));
-            bw.write(result);
-            bw.flush();
             bw.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
+
 
     private void generateEnrichedMd(File md, List<CodeSnippet> snippets) {
         try {
@@ -256,21 +173,21 @@ public class Main {
                     //line = line.replace(" ", "");
                     //String id = line.split(":")[1];
                     line = line.replace("prodoc", "java");
-                    /*for (CodeSnippet snippet : snippets) {
-                        if (snippet.getId().toLowerCase().equals(line.toLowerCase())) {
-                            line = snippet.getContent();
-                        }
-
-                    }*/
-
-                }
-
-                //if (line.contains("@")) {
                     for (CodeSnippet snippet : snippets) {
                         if (snippet.getId().toLowerCase().equals(line.toLowerCase())) {
                             line = snippet.getContent();
                         }
+
                     }
+
+                }
+
+                //if (line.contains("@")) {
+                for (CodeSnippet snippet : snippets) {
+                    if (snippet.getId().toLowerCase().equals(line.toLowerCase())) {
+                        line = snippet.getContent();
+                    }
+                }
                 //}
 
 
@@ -286,7 +203,7 @@ public class Main {
     }
 
     private void placeHolder() {
-        File file = new File("..\\ProjektDokumentation\\ProjektDokumentation\\src\\main\\java\\Test.java");
+        File file = new File("..\\ProjektDokumentation\\src\\main\\java\\Test.java");
         File md = new File("..\\ProjektDokumentation\\README.md");
 
         try {
