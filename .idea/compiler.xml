@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="MdSearcher" />
         <module name="MdProjekt1" />
+        <module name="ProjektDokumentation-maven-plugin" />
         <module name="MdProjekt3" />
         <module name="MdProjekt2" />
       </profile>
@@ -17,6 +18,7 @@
       <module name="MdProjekt2" target="16" />
       <module name="MdProjekt3" target="16" />
       <module name="MdSearcher" target="16" />
+      <module name="ProjektDokumentation-maven-plugin" target="8" />
     </bytecodeTargetLevel>
   </component>
 </project>

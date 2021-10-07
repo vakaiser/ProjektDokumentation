@@ -11,6 +11,7 @@
         <module>../../MdProjekt1</module>
         <module>../../MdProjekt2</module>
         <module>../../MdProjekt3</module>
+        <module>../ProjektDokumentation</module>
     </modules>
 
     <dependencies>
@@ -30,6 +31,12 @@
             <groupId>org.mdproject</groupId>
             <artifactId>MdProjekt1</artifactId>
             <version>1.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codetemp.example</groupId>
+            <artifactId>ProjektDokumentation-maven-plugin</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 

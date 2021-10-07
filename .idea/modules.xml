@@ -7,6 +7,7 @@
       <module fileurl="file://$PROJECT_DIR$/../MdProjekt3/MdProjekt3.iml" filepath="$PROJECT_DIR$/../MdProjekt3/MdProjekt3.iml" />
       <module fileurl="file://$PROJECT_DIR$/MdSearcher/MdSearcher.iml" filepath="$PROJECT_DIR$/MdSearcher/MdSearcher.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/ProjektDokumentation.iml" filepath="$PROJECT_DIR$/.idea/ProjektDokumentation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ProjektDokumentation/ProjektDokumentation-maven-plugin.iml" filepath="$PROJECT_DIR$/ProjektDokumentation/ProjektDokumentation-maven-plugin.iml" />
     </modules>
   </component>
 </project>

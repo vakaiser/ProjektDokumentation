@@ -45,8 +45,9 @@ public class Main {
                         bw.newLine();
                         bw.flush();
                     }
-                    project = projects.readLine();
+
                 }
+                project = projects.readLine();
                 if(project != null) {
 
                     bw.write("---");
