@@ -13,7 +13,7 @@ import java.util.jar.JarFile;
 public class Main {
     public static void main(String[] args){
         try {
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("MasterMd.md")));
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("HTMLSiteGeneration/src/site/markdown/MasterMd.md")));
             BufferedReader projects = new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResources("OneClassOfProject.txt").nextElement().openStream()));
             String project = projects.readLine();
             while(project != null) {
