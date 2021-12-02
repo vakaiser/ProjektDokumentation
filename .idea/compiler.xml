@@ -8,9 +8,6 @@
         <outputRelativeToContentRoot value="true" />
         <module name="MdSearcher" />
         <module name="MdProjekt1" />
-        <module name="ProjektDokumentation-maven-plugin" />
-        <module name="MdProjekt3" />
-        <module name="MdProjekt2" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

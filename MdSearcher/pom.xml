@@ -7,31 +7,23 @@
     <groupId>org.example</groupId>
     <artifactId>MdSearcher</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <modules>
-        <module>../../MdProjekt1</module>
-        <module>../../MdProjekt2</module>
-        <module>../../MdProjekt3</module>
-        <module>../ProjektDokumentation</module>
-    </modules>
 
     <dependencies>
         <dependency>
             <groupId>org.mdproject</groupId>
             <artifactId>MdProjekt3</artifactId>
             <version>1.0</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.mdproject</groupId>
             <artifactId>MdProjekt2</artifactId>
             <version>1.0</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.mdproject</groupId>
             <artifactId>MdProjekt1</artifactId>
             <version>1.0</version>
-            <scope>compile</scope>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.codetemp.example</groupId>
@@ -46,10 +38,45 @@
             <artifactId>commons-io</artifactId>
             <version>2.6</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+            <version>1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>5.3.11</version>
+        </dependency>
         <!-- DO NOT REMOVE THIS DEPENDENCY!-->
     </dependencies>
     <properties>
         <maven.compiler.source>16</maven.compiler.source>
         <maven.compiler.target>16</maven.compiler.target>
     </properties>
+    <build>
+        <plugins>
+            <!-- dieses Plugin durchforstet alle angegeben dependencies und extrahiert alle md files die im jar file
+            im folder documentation liegen. Diese Dateien werden dann unter target/unpacked-documentation abgelegt -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>unpack-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <excludeTransitive>true</excludeTransitive>
+                            <includes>documentation/**/*.md</includes>
+                            <outputDirectory>${project.build.directory}/unpacked-documentation</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
