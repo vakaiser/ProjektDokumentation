@@ -1,7 +1,11 @@
-import com.sun.org.apache.bcel.internal.classfile.Code;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
+import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -12,26 +16,61 @@ public class Main {
 
         Main main = new Main();
 
-        File file = new File("..\\ProjektDokumentation\\src\\main\\java\\at\\diggah\\lost\\Test.java");
+        File file1 = new File("..\\ProjektDokumentation\\src\\main\\java\\at\\diggah\\lost\\Test.java");
         File file2 = new File("..\\ProjektDokumentation\\src\\main\\java\\at\\diggah\\lost\\Test2.java");
-        List<File> files = new ArrayList<>();
-        files.add(file);
-        files.add(file2);
+        //List<File> files = new ArrayList<>();
+        //files.add(file1);
+        //files.add(file2);
 
-        File md = new File("..\\ProjektDokumentation\\README.md");
-        File md2 = new File("..\\ProjektDokumentation\\README2.md");
+        //File md = new File("..\\ProjektDokumentation\\README.md");
+        //File md2 = new File("..\\ProjektDokumentation\\README2.md");
 
-        List<String> temp = Arrays.stream(file.getAbsolutePath().split(Pattern.quote(File.separator))).collect(Collectors.toList());
-        temp.stream().forEach(System.out::println);
+        //Get all MD files
+        List<File> allFiles = getResourceFolderFiles("");
+        List<File> mdFiles = new ArrayList<>();
+        List<File> javaFiles = new ArrayList<>();
+        for (Iterator iterator = allFiles.iterator(); iterator.hasNext(); ) {
+            File file = (File) iterator.next();
+            if (file.getName().endsWith(".md") || file.getName().endsWith(".markdown"))
+                mdFiles.add(file);
+        }
+
+
+
+        //Get all Java files
+        String dir = System.getProperty("user.dir");
+        Collection files = FileUtils.listFiles(new File(dir), null, true);
+        List<File> classFiles = new ArrayList<>();
+        for (Iterator iterator = files.iterator(); iterator.hasNext();) {
+            File file = (File) iterator.next();
+            if (file.getName().endsWith(".java") && !file.getName().toLowerCase().contains("main") && !file.getName().toLowerCase().contains("codesnippet") && !file.getName().toLowerCase().contains("gitversionmojo"))
+                classFiles.add(file);
+
+            if (file.getName().endsWith(".md") || file.getName().endsWith(".markdown"))
+                mdFiles.add(file);
+        }
+
+        mdFiles = mdFiles.stream().filter(distinctByKey( File::getName)).sorted().collect(Collectors.toList());
+
+        //List<String> temp = Arrays.stream(file1.getAbsolutePath().split(Pattern.quote(File.separator))).collect(Collectors.toList());
+        //temp.stream().forEach(System.out::println);
 
 
 
         //System.out.println(file.getParentFile());
-        System.out.println(file.getAbsolutePath());
-        List<CodeSnippet> snippets = main.findSnippetsBeta(files);
+        System.out.println(file1.getAbsolutePath());
+        List<CodeSnippet> snippets = main.findSnippetsBeta(classFiles);
         snippets.forEach(System.out::println);
         //main.generateEnrichedMd(md, snippets);
-        main.generateNewReadMe(md2, snippets);
+        //main.generateNewReadMe(md2, snippets);
+
+
+
+        for (File obj : mdFiles)
+        {
+            main.generateNewReadMe(obj, snippets);
+        }
+
     }
 
     /*
@@ -232,7 +271,11 @@ public class Main {
 
                 //bw.flush();
             }
-            BufferedWriter bw = new BufferedWriter(new FileWriter("README2.md"));
+            BufferedWriter bw = new BufferedWriter(new FileWriter(md.getName()));
+            bw.write(result);
+            bw.flush();
+
+            bw = new BufferedWriter(new FileWriter("src\\main\\resources\\"+md.getName()));
             bw.write(result);
             bw.flush();
             bw.close();
@@ -319,5 +362,19 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static List<File> getResourceFolderFiles (String folder) {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        URL url = loader.getResource(folder);
+        String path = url.getPath();
+        return Arrays.stream(new File(path).listFiles()).collect(Collectors.toList());
+    }
+
+
+
+    private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
     }
 }

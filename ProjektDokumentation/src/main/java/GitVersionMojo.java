@@ -1,17 +1,27 @@
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 
 import java.io.*;
+import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@Mojo(name = "version", defaultPhase = LifecyclePhase.INITIALIZE)
+@Mojo(name = "version", defaultPhase = LifecyclePhase.INSTALL)
 public class GitVersionMojo extends AbstractMojo {
+
+
+    //@Parameter(defaultValue = "${project}", required = true, readonly = true)
+    //MavenProject project;
 
     //@Parameter(property = "project", readonly = true)
     //private MavenProject project;
@@ -19,24 +29,39 @@ public class GitVersionMojo extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info("Cool, a maven plugin!");
-        //project.
 
-        File file = new File("..\\ProjektDokumentation\\src\\main\\java\\at\\codetemp\\test\\Test.java");
-        File file2 = new File("..\\ProjektDokumentation\\src\\main\\java\\at\\codetemp\\test\\Test2.java");
-        List<File> files = new ArrayList<>();
-        files.add(file);
-        files.add(file2);
+        //List<File> allFiles = getResourceFolderFiles("");
+        List<File> mdFiles = new ArrayList<>();
+        /*for (Iterator iterator = allFiles.iterator(); iterator.hasNext(); ) {
+            File file = (File) iterator.next();
+            if (file.getName().endsWith(".md") || file.getName().endsWith(".markdown"))
+                mdFiles.add(file);
+        }*/
 
-        File md = new File("..\\ProjektDokumentation\\README.md");
+        //Get all Java files
+        String dir = System.getProperty("user.dir");
+        Collection files = FileUtils.listFiles(new File(dir), null, true);
+        List<File> classFiles = new ArrayList<>();
+        for (Iterator iterator = files.iterator(); iterator.hasNext();) {
+            File file = (File) iterator.next();
+            if (file.getName().endsWith(".java") && !file.getName().toLowerCase().contains("main") && !file.getName().toLowerCase().contains("codesnippet") && !file.getName().toLowerCase().contains("gitversionmojo"))
+                classFiles.add(file);
 
-        List<String> temp = Arrays.stream(file.getAbsolutePath().split(Pattern.quote(File.separator))).collect(Collectors.toList());
-        temp.stream().forEach(System.out::println);
+            if (file.getName().endsWith(".md") || file.getName().endsWith(".markdown"))
+                mdFiles.add(file);
+        }
 
-        //System.out.println(file.getParentFile());
-        System.out.println(file.getAbsolutePath());
-        List<CodeSnippet> snippets = findSnippetsBeta(files);
+        mdFiles = mdFiles.stream().filter(distinctByKey( File::getName)).sorted().collect(Collectors.toList());
+
+
+
+        List<CodeSnippet> snippets = findSnippetsBeta(classFiles);
         snippets.forEach(System.out::println);
-        generateEnrichedMd(md, snippets);
+
+        for (File obj : mdFiles)
+        {
+            generateNewReadMe(obj, snippets);
+        }
     }
 
     public List<CodeSnippet> findSnippetsBeta(List<File> files) {
@@ -116,6 +141,87 @@ public class GitVersionMojo extends AbstractMojo {
     }
 
     private void generateNewReadMe(File md, List<CodeSnippet> snippets) {
+        String result = "";
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(md));
+            //BufferedWriter bw = new BufferedWriter(new FileWriter("README2.md"));
+
+            List<String> lines = br.lines().collect(Collectors.toList());
+
+            String line = "";
+            boolean ignore = false;
+            for (int i = 0; i < lines.size(); i++) {
+                line = lines.get(i);
+                if (line.toLowerCase().contains("prodoc") && line.toLowerCase().contains("!")) {
+                    //line = line.replace("prodoc", "java");
+
+                    //bw.write(line);
+                    result += line;
+
+                    //bw.newLine();
+                    result += "\n";
+
+                    //bw.write("<!---start doc -->");
+                    result += "<!---start doc -->";
+
+
+                    result += "\n";
+                    result += "```java";
+
+                    for (CodeSnippet snippet : snippets) {
+                        if (line.toLowerCase().contains(snippet.getId().toLowerCase())) {
+                            //bw.newLine();
+                            result += "\n";
+
+                            //bw.write(snippet.getContent());
+                            result += snippet.getContent();
+                            //line = snippet.getContent();
+                        }
+                    }
+                    result += "```";
+                    result += "\n";
+
+                    //bw.write("<!---end doc -->");
+                    result += "<!---end doc -->";
+
+                    //bw.newLine();
+                    result += "\n";
+                    continue;
+                }
+                else if (line.toLowerCase().contains("start doc")) {
+                    ignore = true;
+                    continue;
+                }
+                else if (line.toLowerCase().contains("end doc")) {
+                    ignore = false;
+                    continue;
+                }
+
+                if (!ignore) {
+                    //bw.write(line);
+                    result += line;
+
+                    //bw.newLine();
+                    result += "\n";
+                }
+
+                //bw.flush();
+            }
+            BufferedWriter bw = new BufferedWriter(new FileWriter(md.getName()));
+            bw.write(result);
+            bw.flush();
+
+            bw = new BufferedWriter(new FileWriter("src\\main\\resources\\"+md.getName()));
+            bw.write(result);
+            bw.flush();
+            bw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /*private void generateNewReadMe(File md, List<CodeSnippet> snippets) {
         try {
             BufferedReader br = new BufferedReader(new FileReader(md));
             BufferedWriter bw = new BufferedWriter(new FileWriter("README.md"));
@@ -156,7 +262,7 @@ public class GitVersionMojo extends AbstractMojo {
             e.printStackTrace();
         }
 
-    }
+    }*/
 
 
     private void generateEnrichedMd(File md, List<CodeSnippet> snippets) {
@@ -202,39 +308,15 @@ public class GitVersionMojo extends AbstractMojo {
 
     }
 
-    private void placeHolder() {
-        File file = new File("..\\ProjektDokumentation\\src\\main\\java\\Test.java");
-        File md = new File("..\\ProjektDokumentation\\README.md");
+    /*private static List<File> getResourceFolderFiles (String folder) {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        URL url = loader.getResource(folder);
+        String path = url.getPath();
+        return Arrays.stream(new File(path).listFiles()).collect(Collectors.toList());
+    }*/
 
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-
-            int counter = 0;
-            //br.readLine();
-            boolean marked = false;
-            String code = "";
-            List<String> lines = br.lines().collect(Collectors.toList());
-            //System.out.println(lines.size());
-
-            String line = "";
-
-            for (int i = 0; i < lines.size(); i++) {
-                line = lines.get(i);
-                if (line.contains("@Prodoc")) {
-                    if (line.contains("end")) marked = false;
-                    else {
-                        marked = true;
-                        code = line.split(" ")[1];
-                    }
-                } else if (marked) {
-                    code += line.replace("  ", "") + "\n";
-                }
-            }
-
-            //System.out.println(code);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
     }
 }

@@ -1,4 +1,3 @@
-import java.io.*;
 public class CodeSnippet {
 
     String id;
