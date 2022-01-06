@@ -26,14 +26,14 @@ public class Main {
         //File md2 = new File("..\\ProjektDokumentation\\README2.md");
 
         //Get all MD files
-        List<File> allFiles = getResourceFolderFiles("");
+        /*List<File> allFiles = getResourceFolderFiles("");
         List<File> mdFiles = new ArrayList<>();
         List<File> javaFiles = new ArrayList<>();
         for (Iterator iterator = allFiles.iterator(); iterator.hasNext(); ) {
             File file = (File) iterator.next();
             if (file.getName().endsWith(".md") || file.getName().endsWith(".markdown"))
                 mdFiles.add(file);
-        }
+        }*/
 
 
 
@@ -41,6 +41,7 @@ public class Main {
         String dir = System.getProperty("user.dir");
         Collection files = FileUtils.listFiles(new File(dir), null, true);
         List<File> classFiles = new ArrayList<>();
+        List<File> mdFiles = new ArrayList<>();
         for (Iterator iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
             if (file.getName().endsWith(".java") && !file.getName().toLowerCase().contains("main") && !file.getName().toLowerCase().contains("codesnippet") && !file.getName().toLowerCase().contains("gitversionmojo"))
@@ -58,9 +59,9 @@ public class Main {
 
 
         //System.out.println(file.getParentFile());
-        System.out.println(file1.getAbsolutePath());
+        //System.out.println(file1.getAbsolutePath());
         List<CodeSnippet> snippets = main.findSnippetsBeta(classFiles);
-        snippets.forEach(System.out::println);
+        //snippets.forEach(System.out::println);
         //main.generateEnrichedMd(md, snippets);
         //main.generateNewReadMe(md2, snippets);
 
@@ -149,12 +150,12 @@ public class Main {
             boolean marked = false;
             String content = "";
             String id = "";
-            System.out.println(lines.size());
+            //System.out.println(lines.size());
 
             //String item = "";
 
             for (Map.Entry<String, List<String>> entry : pathLines.entrySet()) {
-                System.out.println(entry.getKey() + ":" + entry.getValue());
+                //System.out.println(entry.getKey() + ":" + entry.getValue());
 
                 List<String> temp = entry.getValue();
                 for (String item : temp) {
@@ -196,7 +197,7 @@ public class Main {
                 }
             }*/
 
-            System.out.println(content); //test stuff
+            //System.out.println(content); //test stuff
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -205,6 +206,11 @@ public class Main {
     }
 
     private void generateNewReadMe(File md, List<CodeSnippet> snippets) {
+        List<String> oldCode = new ArrayList<>();
+        List<String> newCode = new ArrayList<>();
+        String name = "";
+        String collectedLines = "Markdown;Prodoc;Score";
+
         String result = "";
         try {
             BufferedReader br = new BufferedReader(new FileReader(md));
@@ -216,8 +222,13 @@ public class Main {
             boolean ignore = false;
             for (int i = 0; i < lines.size(); i++) {
                 line = lines.get(i);
+
+                //Write new Code Snippet
                 if (line.toLowerCase().contains("prodoc") && line.toLowerCase().contains("!")) {
                     //line = line.replace("prodoc", "java");
+                    //<!---prodoc at.diggah.lost.Test.ichwillesso -->
+                    String[] nameArr = line.split("prodoc");
+                    name = nameArr[1].split("-->")[0].trim();
 
                     //bw.write(line);
                     result += line;
@@ -240,6 +251,9 @@ public class Main {
                             //bw.write(snippet.getContent());
                             result += snippet.getContent();
                             //line = snippet.getContent();
+                            String[] arr = snippet.getContent().split("\n");
+                            Arrays.stream(arr).forEach(x -> newCode.add(x));
+                            //newCode.add(snippet.getContent());
                         }
                     }
                     result += "```";
@@ -252,15 +266,43 @@ public class Main {
                     result += "\n";
                     continue;
                 }
+                //Look if there was any old doc snippets
                 else if (line.toLowerCase().contains("start doc")) {
-                    ignore = true;
+                    ignore = true; //ignore => ignore until the code snippets isn't present anymore
                     continue;
                 }
                 else if (line.toLowerCase().contains("end doc")) {
                     ignore = false;
+
+                    /*//SOSIG GAMING
+                    if (!oldCode.equals(newCode)) {
+                        newCode.forEach(x -> System.out.println(x + " NEW CODE"));
+                        System.out.println(newCode.size() + " NEW");
+
+                        oldCode.forEach(x -> System.out.println(x + " OLD CODE"));
+                        System.out.println(oldCode.size() + " OLD");
+
+                        List<String> temp =  newCode;
+                        temp.retainAll(oldCode);
+
+                        System.out.println(temp.size());
+
+                        System.out.println();
+                        int solution = 100 - ((temp.size()*100) / oldCode.size());
+
+                        System.out.println(solution%);
+
+                        //newMethod(solution, MD-Name, prodoc-name); => generates file that shows differences
+                    }*/
+                    collectedLines = collectDifferences(oldCode, newCode, md.getName(), name, collectedLines);
+
+                    oldCode.clear();
+                    newCode.clear();
+
                     continue;
                 }
 
+                //if it isn't an old code block write it down
                 if (!ignore) {
                     //bw.write(line);
                     result += line;
@@ -268,9 +310,14 @@ public class Main {
                     //bw.newLine();
                     result += "\n";
                 }
+                else if (ignore && !line.contains("```")) {
+                    oldCode.add(line);
+                }
 
                 //bw.flush();
             }
+
+            //Write new MD
             BufferedWriter bw = new BufferedWriter(new FileWriter(md.getName()));
             bw.write(result);
             bw.flush();
@@ -279,10 +326,70 @@ public class Main {
             bw.write(result);
             bw.flush();
             bw.close();
+            generateCsvForDifferences(collectedLines);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    private String collectDifferences(List<String> oldCode, List<String> newCode, String mdName, String methodName, String collectedLines) {
+        int solution = 0;
+        String csvLine = "";
+        if (!oldCode.equals(newCode)) {
+            newCode.forEach(x -> System.out.println(x + " NEW CODE"));
+            System.out.println(newCode.size() + " NEW");
+
+            oldCode.forEach(x -> System.out.println(x + " OLD CODE"));
+            System.out.println(oldCode.size() + " OLD");
+
+            if (oldCode.size() < newCode.size()) {
+                List<String> temp =  oldCode;
+                temp.retainAll(newCode);
+
+                System.out.println(temp.size());
+
+                System.out.println();
+                solution = 100 - ((temp.size()*100) / newCode.size());
+
+                System.out.println(solution+"%");
+                System.out.println();
+                System.out.println();
+
+            }
+            else {
+                List<String> temp =  newCode;
+                temp.retainAll(oldCode);
+
+                System.out.println(temp.size());
+
+                System.out.println();
+                solution = 100 - ((temp.size()*100) / oldCode.size());
+
+                System.out.println(solution+"%");
+                System.out.println();
+                System.out.println();
+            }
+        }
+
+        if (solution >= 50) {
+            csvLine = mdName+";"+methodName+";"+solution+"";
+            System.out.println(csvLine);
+            return collectedLines+"\n"+csvLine;
+        }
+
+        return collectedLines;
+    }
+
+    private void generateCsvForDifferences(String lines) {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("src\\main\\resources\\Score.csv"));
+            bw.write(lines);
+            bw.flush();
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void generateEnrichedMd(File md, List<CodeSnippet> snippets) {
@@ -370,8 +477,6 @@ public class Main {
         String path = url.getPath();
         return Arrays.stream(new File(path).listFiles()).collect(Collectors.toList());
     }
-
-
 
     private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Set<Object> seen = ConcurrentHashMap.newKeySet();

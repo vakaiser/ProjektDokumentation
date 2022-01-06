@@ -56,7 +56,7 @@ public class GitVersionMojo extends AbstractMojo {
 
 
         List<CodeSnippet> snippets = findSnippetsBeta(classFiles);
-        snippets.forEach(System.out::println);
+        //snippets.forEach(x -> System.out.println(x + "\n"));
 
         for (File obj : mdFiles)
         {
@@ -85,12 +85,12 @@ public class GitVersionMojo extends AbstractMojo {
             boolean marked = false;
             String content = "";
             String id = "";
-            System.out.println(lines.size());
+            //System.out.println(lines.size());
 
             //String item = "";
 
             for (Map.Entry<String, List<String>> entry : pathLines.entrySet()) {
-                System.out.println(entry.getKey() + ":" + entry.getValue());
+                //System.out.println(entry.getKey() + ":" + entry.getValue());
 
                 List<String> temp = entry.getValue();
                 for (String item : temp) {
@@ -132,7 +132,7 @@ public class GitVersionMojo extends AbstractMojo {
                 }
             }*/
 
-            System.out.println(content); //test stuff
+            //System.out.println(content); //test stuff
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -141,6 +141,11 @@ public class GitVersionMojo extends AbstractMojo {
     }
 
     private void generateNewReadMe(File md, List<CodeSnippet> snippets) {
+        List<String> oldCode = new ArrayList<>();
+        List<String> newCode = new ArrayList<>();
+        String name = "";
+        String collectedLines = "Markdown;Prodoc;Score";
+
         String result = "";
         try {
             BufferedReader br = new BufferedReader(new FileReader(md));
@@ -152,7 +157,12 @@ public class GitVersionMojo extends AbstractMojo {
             boolean ignore = false;
             for (int i = 0; i < lines.size(); i++) {
                 line = lines.get(i);
+
+                //Write new Code Snippet
                 if (line.toLowerCase().contains("prodoc") && line.toLowerCase().contains("!")) {
+                    String[] nameArr = line.split("prodoc");
+                    name = nameArr[1].split("-->")[0].trim();
+
                     //line = line.replace("prodoc", "java");
 
                     //bw.write(line);
@@ -176,6 +186,8 @@ public class GitVersionMojo extends AbstractMojo {
                             //bw.write(snippet.getContent());
                             result += snippet.getContent();
                             //line = snippet.getContent();
+                            String[] arr = snippet.getContent().split("\n");
+                            Arrays.stream(arr).forEach(x -> newCode.add(x));
                         }
                     }
                     result += "```";
@@ -188,15 +200,21 @@ public class GitVersionMojo extends AbstractMojo {
                     result += "\n";
                     continue;
                 }
+                //Look if there was any old doc snippets
                 else if (line.toLowerCase().contains("start doc")) {
-                    ignore = true;
+                    ignore = true; //ignore => ignore until the code snippets isn't present anymore
                     continue;
                 }
                 else if (line.toLowerCase().contains("end doc")) {
                     ignore = false;
+                    collectedLines = collectDifferences(oldCode, newCode, md.getName(), name, collectedLines);
+
+                    oldCode.clear();
+                    newCode.clear();
                     continue;
                 }
 
+                //if it isn't an old code block write it down
                 if (!ignore) {
                     //bw.write(line);
                     result += line;
@@ -204,9 +222,29 @@ public class GitVersionMojo extends AbstractMojo {
                     //bw.newLine();
                     result += "\n";
                 }
+                else if (ignore && !line.contains("```")) {
+                    oldCode.add(line);
+                }
 
                 //bw.flush();
             }
+
+            if (!oldCode.equals(newCode)) {
+                //newCode.forEach(System.out::println);
+
+                List<String> temp =  newCode;
+                temp.retainAll(oldCode);
+
+                System.out.println(temp.size());
+
+                System.out.println();
+                //double solution = (temp.size()*100) / newCode.size();
+/*
+            System.out.println(solution);*/
+
+            }
+
+            //Write new MD
             BufferedWriter bw = new BufferedWriter(new FileWriter(md.getName()));
             bw.write(result);
             bw.flush();
@@ -215,6 +253,7 @@ public class GitVersionMojo extends AbstractMojo {
             bw.write(result);
             bw.flush();
             bw.close();
+            generateCsvForDifferences(collectedLines);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -318,5 +357,64 @@ public class GitVersionMojo extends AbstractMojo {
     private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Set<Object> seen = ConcurrentHashMap.newKeySet();
         return t -> seen.add(keyExtractor.apply(t));
+    }
+
+    private String collectDifferences(List<String> oldCode, List<String> newCode, String mdName, String methodName, String collectedLines) {
+        int solution = 0;
+        String csvLine = "";
+        if (!oldCode.equals(newCode)) {
+            newCode.forEach(x -> System.out.println(x + " NEW CODE"));
+            System.out.println(newCode.size() + " NEW");
+
+            oldCode.forEach(x -> System.out.println(x + " OLD CODE"));
+            System.out.println(oldCode.size() + " OLD");
+
+            if (oldCode.size() < newCode.size()) {
+                List<String> temp =  oldCode;
+                temp.retainAll(newCode);
+
+                System.out.println(temp.size());
+
+                System.out.println();
+                solution = 100 - ((temp.size()*100) / newCode.size());
+
+                System.out.println(solution+"%");
+                System.out.println();
+                System.out.println();
+
+            }
+            else {
+                List<String> temp =  newCode;
+                temp.retainAll(oldCode);
+
+                System.out.println(temp.size());
+
+                System.out.println();
+                solution = 100 - ((temp.size()*100) / oldCode.size());
+
+                System.out.println(solution+"%");
+                System.out.println();
+                System.out.println();
+            }
+        }
+
+        if (solution >= 50) {
+            csvLine = mdName+";"+methodName+";"+solution+"";
+            System.out.println(csvLine);
+            return collectedLines+"\n"+csvLine;
+        }
+
+        return collectedLines;
+    }
+
+    private void generateCsvForDifferences(String lines) {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("src\\main\\resources\\Score.csv"));
+            bw.write(lines);
+            bw.flush();
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
