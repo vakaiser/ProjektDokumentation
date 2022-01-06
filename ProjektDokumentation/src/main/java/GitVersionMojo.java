@@ -58,6 +58,16 @@ public class GitVersionMojo extends AbstractMojo {
         List<CodeSnippet> snippets = findSnippetsBeta(classFiles);
         //snippets.forEach(x -> System.out.println(x + "\n"));
 
+        try {
+            BufferedWriter bwForCsv = new BufferedWriter(new FileWriter("src\\main\\resources\\Score.csv"));
+            bwForCsv.write("Markdown;Prodoc;Score");
+            bwForCsv.flush();
+            bwForCsv.close();
+            System.out.println("amogus");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         for (File obj : mdFiles)
         {
             generateNewReadMe(obj, snippets);
@@ -144,7 +154,7 @@ public class GitVersionMojo extends AbstractMojo {
         List<String> oldCode = new ArrayList<>();
         List<String> newCode = new ArrayList<>();
         String name = "";
-        String collectedLines = "Markdown;Prodoc;Score";
+
 
         String result = "";
         try {
@@ -207,7 +217,7 @@ public class GitVersionMojo extends AbstractMojo {
                 }
                 else if (line.toLowerCase().contains("end doc")) {
                     ignore = false;
-                    collectedLines = collectDifferences(oldCode, newCode, md.getName(), name, collectedLines);
+                    collectDifferences(oldCode, newCode, md.getName(), name);
 
                     oldCode.clear();
                     newCode.clear();
@@ -229,21 +239,6 @@ public class GitVersionMojo extends AbstractMojo {
                 //bw.flush();
             }
 
-            if (!oldCode.equals(newCode)) {
-                //newCode.forEach(System.out::println);
-
-                List<String> temp =  newCode;
-                temp.retainAll(oldCode);
-
-                System.out.println(temp.size());
-
-                System.out.println();
-                //double solution = (temp.size()*100) / newCode.size();
-/*
-            System.out.println(solution);*/
-
-            }
-
             //Write new MD
             BufferedWriter bw = new BufferedWriter(new FileWriter(md.getName()));
             bw.write(result);
@@ -253,7 +248,7 @@ public class GitVersionMojo extends AbstractMojo {
             bw.write(result);
             bw.flush();
             bw.close();
-            generateCsvForDifferences(collectedLines);
+            System.out.println("aaa");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -359,7 +354,7 @@ public class GitVersionMojo extends AbstractMojo {
         return t -> seen.add(keyExtractor.apply(t));
     }
 
-    private String collectDifferences(List<String> oldCode, List<String> newCode, String mdName, String methodName, String collectedLines) {
+    private void collectDifferences(List<String> oldCode, List<String> newCode, String mdName, String methodName) {
         int solution = 0;
         String csvLine = "";
         if (!oldCode.equals(newCode)) {
@@ -370,47 +365,45 @@ public class GitVersionMojo extends AbstractMojo {
             System.out.println(oldCode.size() + " OLD");
 
             if (oldCode.size() < newCode.size()) {
-                List<String> temp =  oldCode;
+                List<String> temp = oldCode;
                 temp.retainAll(newCode);
 
                 System.out.println(temp.size());
 
                 System.out.println();
-                solution = 100 - ((temp.size()*100) / newCode.size());
+                solution = 100 - ((temp.size() * 100) / newCode.size());
 
-                System.out.println(solution+"%");
+                System.out.println(solution + "%");
                 System.out.println();
                 System.out.println();
 
-            }
-            else {
-                List<String> temp =  newCode;
+            } else {
+                List<String> temp = newCode;
                 temp.retainAll(oldCode);
 
                 System.out.println(temp.size());
 
                 System.out.println();
-                solution = 100 - ((temp.size()*100) / oldCode.size());
+                solution = 100 - ((temp.size() * 100) / oldCode.size());
 
-                System.out.println(solution+"%");
+                System.out.println(solution + "%");
                 System.out.println();
                 System.out.println();
             }
         }
 
         if (solution >= 50) {
-            csvLine = mdName+";"+methodName+";"+solution+"";
+            csvLine = mdName + ";" + methodName + ";" + solution + "";
             System.out.println(csvLine);
-            return collectedLines+"\n"+csvLine;
+            //result =  collectedLines+"\n"+csvLine;
+            generateCsvForDifferences(csvLine);
         }
-
-        return collectedLines;
     }
 
-    private void generateCsvForDifferences(String lines) {
+    private void generateCsvForDifferences(String line) {
         try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter("src\\main\\resources\\Score.csv"));
-            bw.write(lines);
+            BufferedWriter bw = new BufferedWriter(new FileWriter("src\\main\\resources\\Score.csv", true));
+            bw.append("\n"+line);
             bw.flush();
             bw.close();
         } catch (IOException e) {

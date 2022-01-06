@@ -65,13 +65,20 @@ public class Main {
         //main.generateEnrichedMd(md, snippets);
         //main.generateNewReadMe(md2, snippets);
 
-
+        try {
+            BufferedWriter bwForCsv = new BufferedWriter(new FileWriter("src\\main\\resources\\Score.csv"));
+            bwForCsv.write("Markdown;Prodoc;Score");
+            bwForCsv.flush();
+            bwForCsv.close();
+            System.out.println("amogus");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         for (File obj : mdFiles)
         {
             main.generateNewReadMe(obj, snippets);
         }
-
     }
 
     /*
@@ -209,7 +216,7 @@ public class Main {
         List<String> oldCode = new ArrayList<>();
         List<String> newCode = new ArrayList<>();
         String name = "";
-        String collectedLines = "Markdown;Prodoc;Score";
+        //String collectedLines = "";
 
         String result = "";
         try {
@@ -294,7 +301,7 @@ public class Main {
 
                         //newMethod(solution, MD-Name, prodoc-name); => generates file that shows differences
                     }*/
-                    collectedLines = collectDifferences(oldCode, newCode, md.getName(), name, collectedLines);
+                    collectDifferences(oldCode, newCode, md.getName(), name);
 
                     oldCode.clear();
                     newCode.clear();
@@ -326,14 +333,14 @@ public class Main {
             bw.write(result);
             bw.flush();
             bw.close();
-            generateCsvForDifferences(collectedLines);
+            //generateCsvForDifferences(collectedLines);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
-    private String collectDifferences(List<String> oldCode, List<String> newCode, String mdName, String methodName, String collectedLines) {
+    private void collectDifferences(List<String> oldCode, List<String> newCode, String mdName, String methodName) {
         int solution = 0;
         String csvLine = "";
         if (!oldCode.equals(newCode)) {
@@ -375,16 +382,16 @@ public class Main {
         if (solution >= 50) {
             csvLine = mdName+";"+methodName+";"+solution+"";
             System.out.println(csvLine);
-            return collectedLines+"\n"+csvLine;
+            //result =  collectedLines+"\n"+csvLine;
+            generateCsvForDifferences(csvLine);
         }
 
-        return collectedLines;
     }
 
-    private void generateCsvForDifferences(String lines) {
+    private void generateCsvForDifferences(String line) {
         try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter("src\\main\\resources\\Score.csv"));
-            bw.write(lines);
+            BufferedWriter bw = new BufferedWriter(new FileWriter("src\\main\\resources\\Score.csv", true));
+            bw.append("\n"+line);
             bw.flush();
             bw.close();
         } catch (IOException e) {
