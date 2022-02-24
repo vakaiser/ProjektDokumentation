@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@Mojo(name = "version", defaultPhase = LifecyclePhase.INSTALL)
+@Mojo(name = "markdocuments", defaultPhase = LifecyclePhase.INSTALL)
 public class GitVersionMojo extends AbstractMojo {
 
 
@@ -373,9 +373,6 @@ public class GitVersionMojo extends AbstractMojo {
                 System.out.println();
                 solution = 100 - ((temp.size() * 100) / newCode.size());
 
-                System.out.println(solution + "%");
-                System.out.println();
-                System.out.println();
 
             } else {
                 List<String> temp = newCode;
@@ -386,10 +383,49 @@ public class GitVersionMojo extends AbstractMojo {
                 System.out.println();
                 solution = 100 - ((temp.size() * 100) / oldCode.size());
 
-                System.out.println(solution + "%");
-                System.out.println();
-                System.out.println();
             }
+
+            //new stuff
+            int num = -1;
+            List<String> newDif = newCode;
+            newDif.retainAll(oldCode);
+
+            List<String> oldDif = oldCode;
+            oldDif.retainAll(newCode);
+            if (newDif.size() > oldDif.size())
+                num = oldDif.size();
+            else
+                num = newDif.size();
+
+            for (int i = 0; i < num; i++) {
+                List<String> splittedNew = Arrays.stream(newCode.get(i).split(" ")).collect(Collectors.toList());
+                List<String> splittedOld = Arrays.stream(oldCode.get(i).split(" ")).collect(Collectors.toList());
+                if (splittedOld.size() < splittedNew.size()) {
+                    List<String> tempWord =  splittedOld;
+                    tempWord.retainAll(splittedNew);
+
+                    System.out.println(tempWord.size());
+
+                    System.out.println();
+                    solution -= (tempWord.size()*num) / splittedNew.size();
+
+
+                }
+                else {
+                    List<String> tempWord =  splittedNew;
+                    tempWord.retainAll(splittedOld);
+
+                    System.out.println(tempWord.size());
+
+                    System.out.println();
+                    solution -= (tempWord.size()*num) / splittedOld.size();
+
+                }
+            }
+
+            System.out.println(solution+"%");
+            System.out.println();
+            System.out.println();
         }
 
         if (solution >= 50) {
