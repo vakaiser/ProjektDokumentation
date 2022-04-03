@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.codetemp.example</groupId>
-    <artifactId>projektDokumentation-maven-plugin</artifactId>
+    <groupId>org.codetemp.prodoc</groupId>
+    <artifactId>prodoc-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
     <version>1.0-SNAPSHOT</version>
 
-    <name>Documentations Generator</name>
-    <description>Generates Documents</description>
+    <name>Markdocuments</name>
+    <description>Generates codeblocks in Markdown files using marked source code.</description>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

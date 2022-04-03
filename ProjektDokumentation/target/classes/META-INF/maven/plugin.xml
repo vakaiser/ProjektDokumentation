@@ -5,15 +5,15 @@
 <plugin>
   <name>Documentations Generator</name>
   <description>Generates Documents</description>
-  <groupId>org.codetemp.example</groupId>
-  <artifactId>projektDokumentation-maven-plugin</artifactId>
+  <groupId>org.codetemp.prodoc</groupId>
+  <artifactId>prodoc-maven-plugin</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <goalPrefix>projektDokumentation</goalPrefix>
+  <goalPrefix>prodoc</goalPrefix>
   <isolatedRealm>false</isolatedRealm>
   <inheritedByDefault>true</inheritedByDefault>
   <mojos>
     <mojo>
-      <goal>version</goal>
+      <goal>markdocuments</goal>
       <requiresDirectInvocation>false</requiresDirectInvocation>
       <requiresProject>true</requiresProject>
       <requiresReports>false</requiresReports>

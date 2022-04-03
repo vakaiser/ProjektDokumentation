@@ -6,9 +6,9 @@
   <name>Documentations Generator</name>
   <description>Generates Documents</description>
   <groupId>org.codetemp.example</groupId>
-  <artifactId>projektDokumentation-maven-plugin</artifactId>
+  <artifactId>prodoc-maven-plugin</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <goalPrefix>projektDokumentation</goalPrefix>
+  <goalPrefix>prodoc</goalPrefix>
   <mojos>
     <mojo>
       <goal>markdocuments</goal>

@@ -231,7 +231,7 @@ public class Main {
                 line = lines.get(i);
 
                 //Write new Code Snippet
-                if (line.toLowerCase().contains("prodoc") && line.toLowerCase().contains("!")) {
+                if (line.toLowerCase().contains("prodoc") && line.toLowerCase().contains("!") && !line.startsWith("\\")) {
                     //line = line.replace("prodoc", "java");
                     //<!---prodoc at.diggah.lost.Test.ichwillesso -->
                     String[] nameArr = line.split("prodoc");
