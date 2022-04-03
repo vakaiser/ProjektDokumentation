@@ -3,7 +3,7 @@
 test
 
 
-<!---prodoc at.diggah.lost.Test2.Test2_oneTwoThree_1 -->
+<!---prodoc at.test.testi.Test2.Test2_oneTwoThree_1 -->
 <!---start doc -->
 ```java
 private void oneTwoThree() {
