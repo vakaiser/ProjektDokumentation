@@ -2,7 +2,7 @@
 
 test
 
-<!---prodoc at.diggah.lost.Test.ichwillesso -->
+<!---prodoc at.test.testi.Test.ichwillesso -->
 <!---start doc -->
 ```java
 System.out.println("This is a test!");

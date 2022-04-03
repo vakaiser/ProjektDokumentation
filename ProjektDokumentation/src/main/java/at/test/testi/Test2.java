@@ -1,4 +1,4 @@
-package at.diggah.lost;
+package at.test.testi;
 
 public class Test2 {
 

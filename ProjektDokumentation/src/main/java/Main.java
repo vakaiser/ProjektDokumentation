@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class Main {
 
     public static void main(String args[]) {
-        System.out.println("asdf");
+        //System.out.println("asdf");
 
         Main main = new Main();
 
@@ -70,7 +70,6 @@ public class Main {
             bwForCsv.write("Markdown;Prodoc;Score");
             bwForCsv.flush();
             bwForCsv.close();
-            System.out.println("amogus");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -233,7 +232,7 @@ public class Main {
                 //Write new Code Snippet
                 if (line.toLowerCase().contains("prodoc") && line.toLowerCase().contains("!") && !line.startsWith("\\")) {
                     //line = line.replace("prodoc", "java");
-                    //<!---prodoc at.diggah.lost.Test.ichwillesso -->
+                    //<!---prodoc Test.ichwillesso -->
                     String[] nameArr = line.split("prodoc");
                     name = nameArr[1].split("-->")[0].trim();
 
@@ -344,20 +343,21 @@ public class Main {
         int solution = 0;
         String csvLine = "";
         if (!oldCode.equals(newCode)) {
+            /*
             newCode.forEach(x -> System.out.println(x + " NEW CODE"));
             System.out.println(newCode.size() + " NEW");
 
             oldCode.forEach(x -> System.out.println(x + " OLD CODE"));
             System.out.println(oldCode.size() + " OLD");
-
+            */
 
             if (oldCode.size() < newCode.size()) {
                 List<String> temp =  oldCode;
                 temp.retainAll(newCode);
 
-                System.out.println(temp.size());
+                //System.out.println(temp.size());
 
-                System.out.println();
+                //System.out.println();
                 solution = 100 - ((temp.size()*100) / newCode.size());
 
                 //System.out.println(solution+"%");
@@ -369,9 +369,9 @@ public class Main {
                 List<String> temp =  newCode;
                 temp.retainAll(oldCode);
 
-                System.out.println(temp.size());
+                //System.out.println(temp.size());
 
-                System.out.println();
+                //System.out.println();
                 solution = 100 - ((temp.size()*100) / oldCode.size());
 
             }
@@ -394,9 +394,9 @@ public class Main {
                     List<String> tempWord =  splittedOld;
                     tempWord.retainAll(splittedNew);
 
-                    System.out.println(tempWord.size());
+                    //System.out.println(tempWord.size());
 
-                    System.out.println();
+                    //System.out.println();
                     solution -= (tempWord.size()*num) / splittedNew.size();
 
 
@@ -405,22 +405,22 @@ public class Main {
                     List<String> tempWord =  splittedNew;
                     tempWord.retainAll(splittedOld);
 
-                    System.out.println(tempWord.size());
+                    //System.out.println(tempWord.size());
 
-                    System.out.println();
+                    //System.out.println();
                     solution -= (tempWord.size()*num) / splittedOld.size();
 
                 }
             }
 
-            System.out.println(solution+"%");
-            System.out.println();
-            System.out.println();
+            //System.out.println(solution+"%");
+            //System.out.println();
+            //System.out.println();
         }
 
         if (solution >= 50) {
             csvLine = mdName+";"+methodName+";"+solution+"";
-            System.out.println(csvLine);
+            //System.out.println(csvLine);
             //result =  collectedLines+"\n"+csvLine;
             generateCsvForDifferences(csvLine);
         }
